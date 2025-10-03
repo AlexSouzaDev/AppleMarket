@@ -18,37 +18,38 @@ export default function Home() {
         {/* Hero Section */}
         <section className="relative bg-black overflow-visible">
           <div className="mx-auto max-w-6xl px-6 pt-14 md:pt-20 pb-8 md:pb-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-              {/* Left: headline and actions */}
-              <div className="max-w-5xl">
-                <h1 className={`${pageAlumni.className} text-6xl md:text-8xl font-black tracking-tight leading-[0.95] mb-8 text-white`}>
-                  a brand new apple always sounds good.
-                </h1>
-                <p className={`${dmSerifText.className} text-2xl md:text-3xl text-white/70 leading-relaxed tracking-normal max-w-2xl mb-10`}>
-                  get maximum value for your iPhone with an instant, no-hassle quote.
-                </p>
-                <div className="flex items-center gap-4">
-                  <SignInButton mode="modal">
-                    <span className={`${dmSerifText.className} inline-flex items-center rounded-full bg-white text-black px-6 py-3 text-sm font-semibold hover:bg-white/90 transition`}>
-                      Get started
-                    </span>
-                  </SignInButton>
-                  <a href="#learn" className="inline-flex items-center rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition">
-                    See pricing
-                  </a>
+            <div className="relative">
+              <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-6">
+                {/* Left: headline and actions */}
+                <div className="max-w-5xl">
+                  <h1 className={`${pageAlumni.className} text-6xl md:text-8xl font-black tracking-tight leading-[0.95] mb-8 text-white`}>
+                    a brand new apple always sounds good.
+                  </h1>
+                  <p className={`${dmSerifText.className} text-2xl md:text-3xl text-white/70 leading-relaxed tracking-normal max-w-2xl mb-10`}>
+                    get maximum value for your iPhone with an instant, no-hassle quote.
+                  </p>
+                  <div className="flex items-center gap-4">
+                    <SignInButton mode="modal">
+                      <span className={`${dmSerifText.className} inline-flex items-center rounded-full bg-white text-black px-6 py-3 text-sm font-semibold hover:bg-white/90 transition`}>
+                        Get started
+                      </span>
+                    </SignInButton>
+                    <a href="#learn" className="inline-flex items-center rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition">
+                      See pricing
+                    </a>
+                  </div>
                 </div>
               </div>
-
-              {/* Right: hero image */}
-              <div className="relative w-full md:justify-self-end md:-mr-24 lg:-mr-40">
-                <div className="relative w-full max-w-[640px] lg:max-w-[760px] xl:max-w-[880px] aspect-[4/5] mx-auto md:mx-0 md:translate-x-10 lg:translate-x-16 scale-[1.18] md:scale-[1.32] lg:scale-[1.38] origin-center pointer-events-none">
+              {/* Oversized floating image */}
+              <div className="pointer-events-none absolute top-1/2 right-[-14%] md:right-[-18%] lg:right-[-22%] -translate-y-1/2">
+                <div className="relative aspect-[4/5] w-[520px] sm:w-[600px] md:w-[760px] lg:w-[900px] xl:w-[1020px]">
                   <Image
                     src="/iphone-hero.png"
                     alt="Green iPhone product shot"
                     fill
                     priority
-                    sizes="(min-width:1280px) 50vw, (min-width:1024px) 55vw, (min-width:768px) 50vw, 90vw"
-                    className="object-contain drop-shadow-[0_50px_80px_rgba(0,0,0,0.7)]"
+                    sizes="(min-width:1536px) 900px, (min-width:1280px) 820px, (min-width:1024px) 760px, 600px"
+                    className="object-contain drop-shadow-[0_60px_110px_rgba(0,0,0,0.75)]"
                   />
                 </div>
               </div>
