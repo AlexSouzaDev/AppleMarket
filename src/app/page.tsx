@@ -41,15 +41,15 @@ export default function Home() {
               </div>
 
               {/* Right: hero image */}
-              <div className="relative w-full md:justify-self-end">
-                <div className="relative w-full max-w-[540px] aspect-[4/5] mx-auto md:mx-0">
+              <div className="relative w-full md:justify-self-end md:-mr-24 lg:-mr-40">
+                <div className="relative w-full max-w-[640px] lg:max-w-[760px] aspect-[4/5] mx-auto md:mx-0 md:translate-x-6 lg:translate-x-12">
                   <Image
                     src="/iphone-hero.png"
                     alt="Green iPhone product shot"
                     fill
                     priority
-                    sizes="(min-width: 1024px) 40vw, (min-width: 768px) 50vw, 90vw"
-                    className="object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.6)]"
+                    sizes="(min-width: 1280px) 50vw, (min-width: 1024px) 55vw, (min-width: 768px) 50vw, 90vw"
+                    className="object-contain drop-shadow-[0_50px_70px_rgba(0,0,0,0.65)]"
                   />
                 </div>
               </div>
