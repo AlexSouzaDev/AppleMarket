@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id                Int         @id @default(autoincrement())
+
+  sellerEmail       String
+
+  phoneModel        String
+  capacity          String
+  batteryHealth     Int
+  physicalCondition String
+  deviceFailure     String
+
+  price             Float
+
+  createdAt         DateTime    @default(now())
+}
+
+model Model {
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  basePrice          Int
+  capacities         Capacity[]
+  marketplaceListings MarketplaceListing[]
+}
+
+model Capacity {
+  id              Int      @id @default(autoincrement())
+  size            String
+  priceAdjustment Int      @default(0)
+  modelId         Int
+  model           Model    @relation(fields: [modelId], references: [id])
+}
+
+model MarketplaceListing {
+  id                Int      @id @default(autoincrement())
+  userId           String
+  modelId          Int
+  model            Model    @relation(fields: [modelId], references: [id])
+  capacity         String
+  batteryHealth    Int
+  physicalCondition String
+  failures         Json     @default("[]")
+  estimatedPriceEur Int
+  status           String   @default("pending")
+  createdAt        DateTime @default(now())
+}
+
+model MyApples {
+  id            Int      @id @default(autoincrement())
+  userId        String
+  modelId       String
+  capacity      Int
+  color         String
+  condition     String
+  failures      Json     @default("[]")
+  extras        Json     @default("[]")
+  batteryHealth Int
+  estimatedPrice Float
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

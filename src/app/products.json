@@ -1,0 +1,72 @@
+[
+    {
+        "id": 1,
+        "name": "Globe Lamp",
+        "description": "A stylish lamp shaped like a next.",
+        "price": 29.99,
+        "image": "/next.svg"
+    },
+    {
+        "id": 2,
+        "name": "World Map Poster",
+        "description": "A detailed poster of the world map.",
+        "price": 14.99,
+        "image": "/next.svg"
+    },
+    {
+        "id": 3,
+        "name": "Travel Journal",
+        "description": "A journal for documenting your travels.",
+        "price": 9.99,
+        "image": "/next.svg"
+    },
+    {
+        "id": 4,
+        "name": "Globe Puzzle",
+        "description": "A fun puzzle in the shape of a next.",
+        "price": 19.99,
+        "image": "/next.svg"
+    },
+    {
+        "id": 5,
+        "name": "Desk Globe",
+        "description": "A classic next for your desk.",
+        "price": 39.99,
+        "image": "/next.svg"
+    },
+    {
+        "id": 6,
+        "name": "Globe Keychain",
+        "description": "A keychain with a miniature next.",
+        "price": 4.99,
+        "image": "/next.svg"
+    },
+    {
+        "id": 7,
+        "name": "Globe Mug",
+        "description": "A coffee mug with a next design.",
+        "price": 12.99,
+        "image": "/next.svg"
+    },
+    {
+        "id": 8,
+        "name": "Globe T-shirt",
+        "description": "A t-shirt featuring a next print.",
+        "price": 17.99,
+        "image": "/next.svg"
+    },
+    {
+        "id": 9,
+        "name": "Globe Bookend",
+        "description": "Bookends shaped like nexts.",
+        "price": 24.99,
+        "image": "/next.svg"
+    },
+    {
+        "id": 10,
+        "name": "Globe Wall Clock",
+        "description": "A wall clock with a next design.",
+        "price": 34.99,
+        "image": "/next.svg"
+    }
+]
