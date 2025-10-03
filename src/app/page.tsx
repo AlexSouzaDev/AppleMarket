@@ -16,9 +16,9 @@ export default function Home() {
 
       <main>
         {/* Hero Section */}
-        <section className="relative overflow-hidden bg-black">
-          <div className="mx-auto max-w-7xl px-6 py-24 md:py-32">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+        <section className="relative bg-black overflow-visible">
+          <div className="mx-auto max-w-6xl px-6 pt-14 md:pt-20 pb-8 md:pb-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
               {/* Left: headline and actions */}
               <div className="max-w-5xl">
                 <h1 className={`${pageAlumni.className} text-6xl md:text-8xl font-black tracking-tight leading-[0.95] mb-8 text-white`}>
@@ -27,7 +27,6 @@ export default function Home() {
                 <p className={`${dmSerifText.className} text-2xl md:text-3xl text-white/70 leading-relaxed tracking-normal max-w-2xl mb-10`}>
                   get maximum value for your iPhone with an instant, no-hassle quote.
                 </p>
-
                 <div className="flex items-center gap-4">
                   <SignInButton mode="modal">
                     <span className={`${dmSerifText.className} inline-flex items-center rounded-full bg-white text-black px-6 py-3 text-sm font-semibold hover:bg-white/90 transition`}>
@@ -42,14 +41,14 @@ export default function Home() {
 
               {/* Right: hero image */}
               <div className="relative w-full md:justify-self-end md:-mr-24 lg:-mr-40">
-                <div className="relative w-full max-w-[640px] lg:max-w-[760px] aspect-[4/5] mx-auto md:mx-0 md:translate-x-6 lg:translate-x-12">
+                <div className="relative w-full max-w-[640px] lg:max-w-[760px] xl:max-w-[880px] aspect-[4/5] mx-auto md:mx-0 md:translate-x-10 lg:translate-x-16 scale-[1.18] md:scale-[1.32] lg:scale-[1.38] origin-center pointer-events-none">
                   <Image
                     src="/iphone-hero.png"
                     alt="Green iPhone product shot"
                     fill
                     priority
-                    sizes="(min-width: 1280px) 50vw, (min-width: 1024px) 55vw, (min-width: 768px) 50vw, 90vw"
-                    className="object-contain drop-shadow-[0_50px_70px_rgba(0,0,0,0.65)]"
+                    sizes="(min-width:1280px) 50vw, (min-width:1024px) 55vw, (min-width:768px) 50vw, 90vw"
+                    className="object-contain drop-shadow-[0_50px_80px_rgba(0,0,0,0.7)]"
                   />
                 </div>
               </div>
