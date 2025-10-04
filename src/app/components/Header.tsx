@@ -1,9 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { DM_Serif_Text } from "next/font/google";
 import { UserButton, SignInButton, SignedIn, SignedOut } from '@clerk/nextjs';
-
-const dmSerifText = DM_Serif_Text({ subsets: ["latin"], weight: ["400"], display: "swap" });
 
 export default function Header() {
     return (
@@ -12,7 +9,9 @@ export default function Header() {
                 <div className="flex items-center justify-between">
                     <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
                         <Image src="/next.svg" alt="Logo" width={40} height={40} />
-                        <span className={`${dmSerifText.className} text-xl font-bold text-black`}>Apple Market</span>
+                        <span className="text-xl font-semibold tracking-tight text-black font-sans">
+                            Apple Market
+                        </span>
                     </Link>
                     <nav className="hidden md:block">
                         <ul className="flex space-x-8 items-center">

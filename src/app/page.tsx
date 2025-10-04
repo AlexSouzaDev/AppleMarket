@@ -61,7 +61,7 @@ export default function Home() {
         <section className="relative overflow-hidden bg-gray-50 border-t border-gray-100">
           <div className="mx-auto max-w-7xl px-6 py-24 md:py-32">
             <div className="text-center mb-16">
-              <h2 className={`${pageAlumni.className} text-5xl md:text-6xl font-black tracking-tight leading-[0.95] mb-8 text-black`}>
+              <h2 className={`${dmSerifText.className} text-5xl md:text-6xl font-black tracking-tight leading-[0.95] mb-8 text-black`}>
                 what's your apple worth?
               </h2>
               <p className={`${dmSerifText.className} text-xl md:text-2xl text-black/70 leading-relaxed tracking-normal max-w-2xl mx-auto`}>

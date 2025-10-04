@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Alumni_Sans_SC, DM_Serif_Text } from "next/font/google";
+import { Geist, Geist_Mono, DM_Serif_Text } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
@@ -17,11 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 
-const alumni = Alumni_Sans_SC({
-  subsets: ["latin"],
-  variable: "--font-alumni-sans-sc",
-  display: "swap",
-});
+// Removed Alumni_Sans_SC globally so it only appears where explicitly imported (hero heading on home page)
 
 const dmSerifText = DM_Serif_Text({
   subsets: ["latin"],
@@ -43,7 +39,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body
-          className={`${alumni.className} ${geistMono.variable} ${dmSerifText.variable} antialiased bg-black text-white`}
+          className={`${geistMono.variable} ${dmSerifText.variable} antialiased bg-black text-white font-sans`}
         >
           <Provider>{children}</Provider>
 
