@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { SignInButton, useAuth } from '@clerk/nextjs';
 import { MODELS, CONDITIONS, FAILURES, EXTRAS } from '@/constants/models';
+import { trpc } from '@/server/client';
 import type { ModelId, ModelOption } from '@/types/models';
 import { DM_Serif_Text } from "next/font/google";
 
@@ -17,6 +18,7 @@ interface FormData {
     failures: string[];
     extras: string[];
     batteryHealth: number; // 70-100
+    notes: string;
 }
 
 export default function DeviceValuationForm() {
@@ -28,6 +30,7 @@ export default function DeviceValuationForm() {
         failures: [],
         extras: [],
         batteryHealth: 100,
+        notes: '',
     });
     const [isDirty, setIsDirty] = useState(false);
     const { isSignedIn } = useAuth();
@@ -88,8 +91,40 @@ export default function DeviceValuationForm() {
         return Math.max(0, Math.round(price));
     }, [formData]);
 
+    const utils = trpc.useUtils?.() as any;
+    const saveMutation = trpc.myApples.saveDevice.useMutation({
+        onSuccess: () => {
+            // Invalidate list so MyApples page refreshes
+            utils?.myApples?.getDevices?.invalidate();
+            setFormData(prev => ({
+                ...prev,
+                // keep model selection for quicker multiple saves
+                capacity: '',
+                color: '',
+                failures: [],
+                extras: [],
+                batteryHealth: 100,
+                notes: '',
+            }));
+            setIsDirty(false);
+        }
+    });
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!isSignedIn) return;
+        if (!computedEstimated || !formData.modelId || !formData.capacity || !formData.color) return;
+        saveMutation.mutate({
+            modelId: formData.modelId,
+            capacity: formData.capacity as number,
+            color: formData.color,
+            condition: formData.condition,
+            failures: formData.failures,
+            extras: formData.extras,
+            batteryHealth: formData.batteryHealth,
+            estimatedPrice: computedEstimated,
+            notes: formData.notes || undefined,
+        });
     };
 
     return (
@@ -179,36 +214,59 @@ export default function DeviceValuationForm() {
                 </div>
             </div>
 
-            <div className="mt-8">
-                <div className="text-center">
-                    <p className="text-lg text-gray-600 mb-2">Estimated Value</p>
-                    <p className={`${dmSerifText.className} text-4xl text-black`} aria-live="polite">
-                        {!isSignedIn
-                            ? (isDirty ? '???' : '€0.00')
-                            : (computedEstimated !== null ? `€${computedEstimated.toFixed(0)}` : '€0.00')}
-                    </p>
-                    {!isSignedIn && isDirty && (
-                        <p className="text-sm text-gray-500 mt-1">Sign in to view your live estimate.</p>
-                    )}
+            <div className="mt-4">
+                {/* Notes */}
+                <div>
+                    <label htmlFor="notes" className="block font-medium">Notes (optional)</label>
+                    <textarea
+                        id="notes"
+                        name="notes"
+                        value={formData.notes}
+                        onChange={(e) => { setIsDirty(true); setFormData(p => ({ ...p, notes: e.target.value })); }}
+                        rows={3}
+                        className="w-full p-2 border rounded resize-none"
+                        placeholder="Any remarks (e.g., small scratch near camera)"
+                    />
                 </div>
 
-                {!isSignedIn ? (
-                    <SignInButton mode="modal">
+                <div className="mt-8">
+                    <div className="text-center">
+                        <p className="text-lg text-gray-600 mb-2">Estimated Value</p>
+                        <p className={`${dmSerifText.className} text-4xl text-black`} aria-live="polite">
+                            {!isSignedIn
+                                ? (isDirty ? '???' : '€0.00')
+                                : (computedEstimated !== null ? `€${computedEstimated.toFixed(0)}` : '€0.00')}
+                        </p>
+                        {!isSignedIn && isDirty && (
+                            <p className="text-sm text-gray-500 mt-1">Sign in to view your live estimate.</p>
+                        )}
+                        {saveMutation.isSuccess && (
+                            <p className="text-sm text-green-600 mt-2">Saved to MyApples.</p>
+                        )}
+                        {saveMutation.isError && (
+                            <p className="text-sm text-red-600 mt-2">Error saving. Try again.</p>
+                        )}
+                    </div>
+
+                    {!isSignedIn ? (
+                        <SignInButton mode="modal">
+                            <button
+                                type="button"
+                                className="w-full mt-6 bg-black text-white rounded-full py-3 px-6 hover:bg-black/90 transition"
+                            >
+                                Sign in to Save
+                            </button>
+                        </SignInButton>
+                    ) : (
                         <button
-                            type="button"
-                            className="w-full mt-6 bg-black text-white rounded-full py-3 px-6 hover:bg-black/90 transition"
+                            type="submit"
+                            disabled={saveMutation.isLoading}
+                            className="w-full mt-6 bg-black text-white rounded-full py-3 px-6 hover:bg-black/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Sign in to Save
+                            {saveMutation.isLoading ? 'Saving...' : 'Save to MyApples'}
                         </button>
-                    </SignInButton>
-                ) : (
-                    <button
-                        type="submit"
-                        className="w-full mt-6 bg-black text-white rounded-full py-3 px-6 hover:bg-black/90 transition"
-                    >
-                        Save to MyApples
-                    </button>
-                )}
+                    )}
+                </div>
             </div>
         </form>
     );
