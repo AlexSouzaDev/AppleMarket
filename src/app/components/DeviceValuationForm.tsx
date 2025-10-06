@@ -260,10 +260,10 @@ export default function DeviceValuationForm() {
                     ) : (
                         <button
                             type="submit"
-                            disabled={saveMutation.isLoading}
+                            disabled={saveMutation.status === 'pending'}
                             className="w-full mt-6 bg-black text-white rounded-full py-3 px-6 hover:bg-black/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {saveMutation.isLoading ? 'Saving...' : 'Save to MyApples'}
+                            {saveMutation.status === 'pending' ? 'Saving...' : 'Save to MyApples'}
                         </button>
                     )}
                 </div>

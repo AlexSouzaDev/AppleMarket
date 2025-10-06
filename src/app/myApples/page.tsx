@@ -28,7 +28,11 @@ export default function Store() {
     // tRPC utils (use trpc.useContext() if your version lacks useUtils)
     const utils = trpc.useUtils();
 
-    const { data: devices = [], isLoading, error } = trpc.myApples.getDevices.useQuery(undefined, {
+    type Device = {
+        id: number; modelId: string; capacity: number; color: string; condition: string; failures: unknown; extras: unknown; batteryHealth: number; estimatedPrice: number; notes: string | null; createdAt: string | Date; updatedAt: string | Date;
+    };
+
+    const { data: devices = [], isLoading, error } = trpc.myApples.getDevices.useQuery<Device[]>(undefined, {
         enabled: !!isSignedIn,
     });
 
@@ -54,10 +58,10 @@ export default function Store() {
     const [editingId, setEditingId] = React.useState<number | null>(null);
     const [noteDraft, setNoteDraft] = React.useState("");
 
-    const filtered = React.useMemo(() => {
+    const filtered = React.useMemo<Device[]>(() => {
         if (!search.trim()) return devices;
         const q = search.toLowerCase();
-        return devices.filter(d => {
+        return devices.filter((d: Device) => {
             const model = (d.modelId || "").toLowerCase();
             const cap = String(d.capacity || "");
             const color = (d.color || "").toLowerCase();
@@ -165,7 +169,7 @@ export default function Store() {
                 </div>
 
                 <div className="grid gap-4">
-                    {filtered.map(d => {
+                    {filtered.map((d: Device) => {
                         const isEditing = editingId === d.id;
                         const prog = Math.min(100, Math.max(0, d.batteryHealth ?? 0));
                         const ringStyle: React.CSSProperties = {
@@ -221,10 +225,10 @@ export default function Store() {
                                                 <div className="flex gap-2">
                                                     <button
                                                         onClick={commitNote}
-                                                        disabled={noteMutation.isLoading}
+                                                        disabled={noteMutation.status === 'pending'}
                                                         className="rounded-full bg-white text-black px-4 py-1.5 text-xs font-medium hover:bg-white/90 disabled:opacity-50"
                                                     >
-                                                        {noteMutation.isLoading ? "Saving…" : "Save"}
+                                                        {noteMutation.status === 'pending' ? "Saving…" : "Save"}
                                                     </button>
                                                     <button
                                                         onClick={cancelEdit}
@@ -247,10 +251,10 @@ export default function Store() {
                                             )}
                                             <button
                                                 onClick={() => handleDelete(d.id)}
-                                                disabled={deleteMutation.isLoading}
+                                                disabled={deleteMutation.status === 'pending'}
                                                 className="rounded-full bg-red-500/80 px-4 py-1 font-medium text-white hover:bg-red-500 disabled:opacity-50"
                                             >
-                                                {deleteMutation.isLoading ? "..." : "Delete"}
+                                                {deleteMutation.status === 'pending' ? "..." : "Delete"}
                                             </button>
                                             <span className="ml-auto self-center text-[10px] text-white/30">
                                                 {d.createdAt ? new Date(d.createdAt as any).toLocaleDateString() : ""}
