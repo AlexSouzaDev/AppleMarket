@@ -19,6 +19,9 @@ interface FormData {
     extras: string[];
     batteryHealth: number; // 70-100
     notes: string;
+    // NEW:
+    priceAdjType: 'none' | 'increase' | 'decrease';
+    priceAdjValue: number; // percentage (0-100)
 }
 
 export default function DeviceValuationForm() {
@@ -31,20 +34,22 @@ export default function DeviceValuationForm() {
         extras: [],
         batteryHealth: 100,
         notes: '',
+        // NEW defaults:
+        priceAdjType: 'none',
+        priceAdjValue: 0,
     });
     const [isDirty, setIsDirty] = useState(false);
     const { isSignedIn } = useAuth();
 
     const selectedModel = MODELS.find(m => m.id === formData.modelId);
 
-    const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setIsDirty(true);
-        if (name === 'capacity' || name === 'batteryHealth') {
-            const num = value === '' ? '' : parseInt(value, 10);
-            setFormData(prev => ({ ...prev, [name]: num as any }));
+        if (name === 'capacity' || name === 'batteryHealth' || name === 'priceAdjValue') {
+            setFormData(prev => ({ ...prev, [name]: value === '' ? '' : Number(value) }));
         } else {
-            setFormData(prev => ({ ...prev, [name]: value }));
+            setFormData(prev => ({ ...prev, [name]: value as any }));
         }
     };
 
@@ -88,8 +93,25 @@ export default function DeviceValuationForm() {
         const totalBonus = formData.extras.reduce((sum, id) => sum + (EXTRAS.find(e => e.id === id)?.bonus ?? 0), 0);
         price = price * (1 + totalBonus);
 
+        // Apply price adjustment
+        if (formData.priceAdjType === 'increase') {
+            price *= (1 + formData.priceAdjValue / 100);
+        } else if (formData.priceAdjType === 'decrease') {
+            price *= (1 - formData.priceAdjValue / 100);
+        }
+
         return Math.max(0, Math.round(price));
     }, [formData]);
+
+    const adjustedEstimated = useMemo(() => {
+        const base = Number(computedEstimated || 0);
+        if (!base) return 0;
+        const v = Number(formData.priceAdjValue || 0);
+        if (!v || formData.priceAdjType === 'none') return Math.round(base);
+        const delta = (base * v) / 100;
+        const result = formData.priceAdjType === 'increase' ? base + delta : base - delta;
+        return Math.max(0, Math.round(result));
+    }, [computedEstimated, formData.priceAdjType, formData.priceAdjValue]);
 
     const utils = trpc.useUtils?.() as any;
     const saveMutation = trpc.myApples.saveDevice.useMutation({
@@ -105,6 +127,9 @@ export default function DeviceValuationForm() {
                 extras: [],
                 batteryHealth: 100,
                 notes: '',
+                // Reset price adjustment
+                priceAdjType: 'none',
+                priceAdjValue: 0,
             }));
             setIsDirty(false);
         }
@@ -122,8 +147,8 @@ export default function DeviceValuationForm() {
             failures: formData.failures,
             extras: formData.extras,
             batteryHealth: formData.batteryHealth,
-            estimatedPrice: computedEstimated,
-            notes: formData.notes || undefined,
+            notes: formData.notes,
+            estimatedPrice: adjustedEstimated, // use adjusted value
         });
     };
 
@@ -214,59 +239,91 @@ export default function DeviceValuationForm() {
                 </div>
             </div>
 
-            <div className="mt-4">
-                {/* Notes */}
-                <div>
-                    <label htmlFor="notes" className="block font-medium">Notes (optional)</label>
-                    <textarea
-                        id="notes"
-                        name="notes"
-                        value={formData.notes}
-                        onChange={(e) => { setIsDirty(true); setFormData(p => ({ ...p, notes: e.target.value })); }}
-                        rows={3}
-                        className="w-full p-2 border rounded resize-none"
-                        placeholder="Any remarks (e.g., small scratch near camera)"
+            {/* Price Adjustment */}
+            <div className="mt-6 rounded-2xl border border-white/10 bg-black/40 p-4">
+                <label className={`${dmSerifText.className} block text-sm text-white/80 mb-2`}>
+                    Notes
+                </label>
+                <textarea
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="Any remarks (e.g., tiny scratch on frame, includes MagSafe case)…"
+                    className="w-full resize-none rounded-xl border border-white/15 bg-black/30 p-3 text-sm outline-none focus:ring-2 focus:ring-white/20"
+                />
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <label className="text-xs text-white/60">Affect price:</label>
+                    <select
+                        name="priceAdjType"
+                        value={formData.priceAdjType}
+                        onChange={handleChange}
+                        className="h-9 rounded-full border border-white/15 bg-black/30 px-3 text-sm"
+                    >
+                        <option value="none">No adjustment</option>
+                        <option value="increase">Increase</option>
+                        <option value="decrease">Decrease</option>
+                    </select>
+                    <input
+                        type="number"
+                        name="priceAdjValue"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={formData.priceAdjValue}
+                        onChange={handleChange}
+                        className="h-9 w-24 rounded-full border border-white/15 bg-black/30 px-3 text-sm"
+                        placeholder="0"
                     />
-                </div>
+                    <span className="text-sm text-white/60">%</span>
 
-                <div className="mt-8">
-                    <div className="text-center">
-                        <p className="text-lg text-gray-600 mb-2">Estimated Value</p>
-                        <p className={`${dmSerifText.className} text-4xl text-black`} aria-live="polite">
-                            {!isSignedIn
-                                ? (isDirty ? '???' : '€0.00')
-                                : (computedEstimated !== null ? `€${computedEstimated.toFixed(0)}` : '€0.00')}
-                        </p>
-                        {!isSignedIn && isDirty && (
-                            <p className="text-sm text-gray-500 mt-1">Sign in to view your live estimate.</p>
-                        )}
-                        {saveMutation.isSuccess && (
-                            <p className="text-sm text-green-600 mt-2">Saved to MyApples.</p>
-                        )}
-                        {saveMutation.isError && (
-                            <p className="text-sm text-red-600 mt-2">Error saving. Try again.</p>
-                        )}
+                    <div className="ml-auto text-sm">
+                        <span className="text-white/50">Base:</span>
+                        <span className="ml-1 text-white font-semibold">€{Number(computedEstimated || 0).toFixed(0)}</span>
+                        <span className="mx-2 text-white/30">→</span>
+                        <span className="text-white/50">Final:</span>
+                        <span className="ml-1 text-emerald-300 font-semibold">€{adjustedEstimated}</span>
                     </div>
+                </div>
+            </div>
 
-                    {!isSignedIn ? (
-                        <SignInButton mode="modal">
-                            <button
-                                type="button"
-                                className="w-full mt-6 bg-black text-white rounded-full py-3 px-6 hover:bg-black/90 transition"
-                            >
-                                Sign in to Save
-                            </button>
-                        </SignInButton>
-                    ) : (
-                        <button
-                            type="submit"
-                            disabled={saveMutation.status === 'pending'}
-                            className="w-full mt-6 bg-black text-white rounded-full py-3 px-6 hover:bg-black/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {saveMutation.status === 'pending' ? 'Saving...' : 'Save to MyApples'}
-                        </button>
+            <div className="mt-4">
+                <div className="text-center">
+                    <p className="text-lg text-gray-600 mb-2">Estimated Value</p>
+                    <p className={`${dmSerifText.className} text-4xl text-black`} aria-live="polite">
+                        {!isSignedIn
+                            ? (isDirty ? '???' : '€0.00')
+                            : (computedEstimated !== null ? `€${computedEstimated.toFixed(0)}` : '€0.00')}
+                    </p>
+                    {!isSignedIn && isDirty && (
+                        <p className="text-sm text-gray-500 mt-1">Sign in to view your live estimate.</p>
+                    )}
+                    {saveMutation.isSuccess && (
+                        <p className="text-sm text-green-600 mt-2">Saved to MyApples.</p>
+                    )}
+                    {saveMutation.isError && (
+                        <p className="text-sm text-red-600 mt-2">Error saving. Try again.</p>
                     )}
                 </div>
+
+                {!isSignedIn ? (
+                    <SignInButton mode="modal">
+                        <button
+                            type="button"
+                            className="w-full mt-6 bg-black text-white rounded-full py-3 px-6 hover:bg-black/90 transition"
+                        >
+                            Sign in to Save
+                        </button>
+                    </SignInButton>
+                ) : (
+                    <button
+                        type="submit"
+                        disabled={saveMutation.status === 'pending'}
+                        className="w-full mt-6 bg-black text-white rounded-full py-3 px-6 hover:bg-black/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {saveMutation.status === 'pending' ? 'Saving...' : 'Save to MyApples'}
+                    </button>
+                )}
             </div>
         </form>
     );
