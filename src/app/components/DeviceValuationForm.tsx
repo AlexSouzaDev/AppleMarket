@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { SignInButton, useAuth } from '@clerk/nextjs';
 import { MODELS, CONDITIONS, FAILURES, EXTRAS } from '@/constants/models';
 import { trpc } from '@/server/client';
-import type { ModelId, ModelOption } from '@/types/models';
+import type { ModelId } from '@/types/models';
 import { DM_Serif_Text } from "next/font/google";
 
 const dmSerifText = DM_Serif_Text({ subsets: ["latin"], weight: ["400"], display: "swap" });
@@ -19,9 +19,8 @@ interface FormData {
     extras: string[];
     batteryHealth: number; // 70-100
     notes: string;
-    // NEW:
-    priceAdjType: 'none' | 'increase' | 'decrease';
-    priceAdjValue: number; // percentage (0-100)
+    // Absolute adjustment (can be negative)
+    priceAdjAmount: number | '';
 }
 
 export default function DeviceValuationForm() {
@@ -34,9 +33,7 @@ export default function DeviceValuationForm() {
         extras: [],
         batteryHealth: 100,
         notes: '',
-        // NEW defaults:
-        priceAdjType: 'none',
-        priceAdjValue: 0,
+        priceAdjAmount: 0,
     });
     const [isDirty, setIsDirty] = useState(false);
     const { isSignedIn } = useAuth();
@@ -46,11 +43,25 @@ export default function DeviceValuationForm() {
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setIsDirty(true);
-        if (name === 'capacity' || name === 'batteryHealth' || name === 'priceAdjValue') {
+
+        if (name === 'capacity' || name === 'batteryHealth') {
             setFormData(prev => ({ ...prev, [name]: value === '' ? '' : Number(value) }));
-        } else {
-            setFormData(prev => ({ ...prev, [name]: value as any }));
+            return;
         }
+
+        if (name === 'priceAdjAmount') {
+            if (value === '') {
+                setFormData(prev => ({ ...prev, priceAdjAmount: '' }));
+            } else {
+                const n = Number.parseInt(value, 10);
+                if (!Number.isNaN(n)) {
+                    setFormData(prev => ({ ...prev, priceAdjAmount: Math.trunc(n) }));
+                }
+            }
+            return;
+        }
+
+        setFormData(prev => ({ ...prev, [name]: value as any }));
     };
 
     const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,6 +83,7 @@ export default function DeviceValuationForm() {
         return 0.85;
     };
 
+    // Base estimate (no manual adjustments)
     const computedEstimated = useMemo(() => {
         if (!formData.modelId || !formData.capacity) return null;
 
@@ -93,31 +105,21 @@ export default function DeviceValuationForm() {
         const totalBonus = formData.extras.reduce((sum, id) => sum + (EXTRAS.find(e => e.id === id)?.bonus ?? 0), 0);
         price = price * (1 + totalBonus);
 
-        // Apply price adjustment
-        if (formData.priceAdjType === 'increase') {
-            price *= (1 + formData.priceAdjValue / 100);
-        } else if (formData.priceAdjType === 'decrease') {
-            price *= (1 - formData.priceAdjValue / 100);
-        }
-
         return Math.max(0, Math.round(price));
     }, [formData]);
 
+    // Final = base + manual adjustment
     const adjustedEstimated = useMemo(() => {
         const base = Number(computedEstimated || 0);
         if (!base) return 0;
-        const v = Number(formData.priceAdjValue || 0);
-        if (!v || formData.priceAdjType === 'none') return Math.round(base);
-        const delta = (base * v) / 100;
-        const result = formData.priceAdjType === 'increase' ? base + delta : base - delta;
-        return Math.max(0, Math.round(result));
-    }, [computedEstimated, formData.priceAdjType, formData.priceAdjValue]);
+        const adj = formData.priceAdjAmount === '' ? 0 : Math.trunc(Number(formData.priceAdjAmount || 0));
+        return Math.max(0, Math.round(base + adj));
+    }, [computedEstimated, formData.priceAdjAmount]);
 
-    const utils = trpc.useUtils?.() as any;
+    const utils = trpc.useContext();
     const saveMutation = trpc.myApples.saveDevice.useMutation({
         onSuccess: () => {
-            // Invalidate list so MyApples page refreshes
-            utils?.myApples?.getDevices?.invalidate();
+            utils.myApples.getDevices.invalidate();
             setFormData(prev => ({
                 ...prev,
                 // keep model selection for quicker multiple saves
@@ -127,9 +129,7 @@ export default function DeviceValuationForm() {
                 extras: [],
                 batteryHealth: 100,
                 notes: '',
-                // Reset price adjustment
-                priceAdjType: 'none',
-                priceAdjValue: 0,
+                priceAdjAmount: 0,
             }));
             setIsDirty(false);
         }
@@ -139,6 +139,7 @@ export default function DeviceValuationForm() {
         e.preventDefault();
         if (!isSignedIn) return;
         if (!computedEstimated || !formData.modelId || !formData.capacity || !formData.color) return;
+
         saveMutation.mutate({
             modelId: formData.modelId,
             capacity: formData.capacity as number,
@@ -148,7 +149,7 @@ export default function DeviceValuationForm() {
             extras: formData.extras,
             batteryHealth: formData.batteryHealth,
             notes: formData.notes,
-            estimatedPrice: adjustedEstimated, // use adjusted value
+            estimatedPrice: adjustedEstimated, // final adjusted value
         });
     };
 
@@ -239,9 +240,9 @@ export default function DeviceValuationForm() {
                 </div>
             </div>
 
-            {/* Price Adjustment */}
-            <div className="mt-6 rounded-2xl border border-white/10 bg-black/40 p-4">
-                <label className={`${dmSerifText.className} block text-sm text-white/80 mb-2`}>
+            {/* Notes + Manual Price Adjustment */}
+            <div className="mt-6 rounded-2xl border border-gray-200 bg-white text-black p-4">
+                <label className={`${dmSerifText.className} block text-sm text-black mb-2`}>
                     Notes
                 </label>
                 <textarea
@@ -250,38 +251,29 @@ export default function DeviceValuationForm() {
                     onChange={handleChange}
                     rows={3}
                     placeholder="Any remarks (e.g., tiny scratch on frame, includes MagSafe case)…"
-                    className="w-full resize-none rounded-xl border border-white/15 bg-black/30 p-3 text-sm outline-none focus:ring-2 focus:ring-white/20"
+                    className="w-full resize-none rounded-xl border border-gray-300 bg-white text-black placeholder-black/60 caret-black p-3 text-sm outline-none focus:ring-2 focus:ring-black/10 focus:border-gray-400"
                 />
                 <div className="mt-4 flex flex-wrap items-center gap-3">
-                    <label className="text-xs text-white/60">Affect price:</label>
-                    <select
-                        name="priceAdjType"
-                        value={formData.priceAdjType}
-                        onChange={handleChange}
-                        className="h-9 rounded-full border border-white/15 bg-black/30 px-3 text-sm"
-                    >
-                        <option value="none">No adjustment</option>
-                        <option value="increase">Increase</option>
-                        <option value="decrease">Decrease</option>
-                    </select>
-                    <input
-                        type="number"
-                        name="priceAdjValue"
-                        min={0}
-                        max={100}
-                        step={1}
-                        value={formData.priceAdjValue}
-                        onChange={handleChange}
-                        className="h-9 w-24 rounded-full border border-white/15 bg-black/30 px-3 text-sm"
-                        placeholder="0"
-                    />
-                    <span className="text-sm text-white/60">%</span>
+                    <label className="text-xs text-black/60">Price adjustment (absolute):</label>
+                    <div className="flex items-center gap-2">
+                        <span className="text-black/40 text-sm">€</span>
+                        <input
+                            type="number"
+                            name="priceAdjAmount"
+                            step={1}
+                            value={formData.priceAdjAmount}
+                            onChange={handleChange}
+                            className="h-9 w-32 rounded-full border border-black/15 bg-white/90 px-3 text-sm"
+                            placeholder="0"
+                        />
+                        <span className="text-xs text-black/50">(use negative to decrease)</span>
+                    </div>
 
                     <div className="ml-auto text-sm">
-                        <span className="text-white/50">Base:</span>
-                        <span className="ml-1 text-white font-semibold">€{Number(computedEstimated || 0).toFixed(0)}</span>
-                        <span className="mx-2 text-white/30">→</span>
-                        <span className="text-white/50">Final:</span>
+                        <span className="text-black/50">Base:</span>
+                        <span className="ml-1 text-black font-semibold">€{Number(computedEstimated || 0).toFixed(0)}</span>
+                        <span className="mx-2 text-black/30">→</span>
+                        <span className="text-black/50">Final:</span>
                         <span className="ml-1 text-emerald-300 font-semibold">€{adjustedEstimated}</span>
                     </div>
                 </div>
