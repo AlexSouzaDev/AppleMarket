@@ -59,7 +59,6 @@ export const CONDITIONS = [
 ] as const;
 
 export const FAILURES = [
-    { id: 'battery', label: 'Battery Health <80%', penalty: 0.15 },
     { id: 'faceId', label: 'Face ID Broken', penalty: 0.125 },
     { id: 'crackedScreen', label: 'Cracked Screen', penalty: 0.275 },
     { id: 'camera', label: 'Camera Issue', penalty: 0.075 },
