@@ -10,7 +10,7 @@ export default function Header() {
                     <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
                         <Image src="/next.svg" alt="Logo" width={40} height={40} />
                         <span className="text-xl font-semibold tracking-tight text-black font-sans">
-                            Apple Market
+                            Apple Vault
                         </span>
                     </Link>
                     <nav className="hidden md:block">

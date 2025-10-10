@@ -9,16 +9,16 @@ export default function About() {
             <Header />
             <main className="container mx-auto px-4 py-16">
                 <h1 className={`${dmSerifText.className} text-4xl md:text-5xl font-black mb-8`}>
-                    About Apple Market
+                    About Apple Vault
                 </h1>
                 <div className={`${dmSerifText.className} prose prose-invert max-w-3xl`}>
                     <p className="text-xl text-gray-300 leading-relaxed">
-                        Welcome to Apple Market, your premier destination for buying and selling Apple products.
-                        We provide a seamless platform for users to get the best value for their devices.
+                        Apple Vault is a web app where users can vault their iOS phones, instantly understand
+                        their current market value, and prepare to resell at a fair price.
                     </p>
                     <p className="text-xl text-gray-300 leading-relaxed mt-6">
-                        Our mission is to create a trusted marketplace where Apple enthusiasts can safely
-                        trade their devices while getting the best possible market rates.
+                        Add your device to your personal vault, track condition and details, and generate a
+                        transparent price estimate—so you can list confidently when it’s time to sell.
                     </p>
                 </div>
             </main>
