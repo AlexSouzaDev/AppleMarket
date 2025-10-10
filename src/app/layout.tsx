@@ -1,20 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, DM_Serif_Text } from "next/font/google";
+import { DM_Serif_Text } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
 import Provider from "../server/Provider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// Keep DM Serif Text available as a CSS variable; use system sans as the base body font
 
 
 // Removed Alumni_Sans_SC globally so it only appears where explicitly imported (hero heading on home page)
@@ -39,7 +30,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body
-          className={`${geistMono.variable} ${dmSerifText.variable} antialiased bg-black text-white font-sans`}
+          className={`${dmSerifText.variable} antialiased bg-black text-white font-sans`}
         >
           <Provider>{children}</Provider>
 
