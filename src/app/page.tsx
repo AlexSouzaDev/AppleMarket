@@ -32,11 +32,13 @@ export default function Home() {
                   </p>
                   <div className="flex items-center gap-4">
                     {hasClerk ? (
-                      <SignInButton mode="modal">
-                        <span className={`${dmSerifText.className} inline-flex items-center rounded-full bg-white text-black px-6 py-3 text-sm font-semibold hover:bg-white/90 transition`}>
-                          Get started
-                        </span>
-                      </SignInButton>
+                      <ClientOnly>
+                        <SignInButton mode="modal">
+                          <span className={`${dmSerifText.className} inline-flex items-center rounded-full bg-white text-black px-6 py-3 text-sm font-semibold hover:bg-white/90 transition`}>
+                            Get started
+                          </span>
+                        </SignInButton>
+                      </ClientOnly>
                     ) : null}
                     <a href="#learn" className="inline-flex items-center rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition">
                       See pricing
@@ -87,21 +89,23 @@ export default function Home() {
             stay always ready to a upgrade.
           </h2>
           {hasClerk ? (
-            <>
-              <SignedOut>
-                <p className={`${dmSerifText.className} text-gray-400 mb-8`}>
-                  Sign in to evaluate your phone and see current market data.
-                </p>
-                <SignInButton mode="modal">
-                  <span className={`${dmSerifText.className} inline-flex items-center rounded-full bg-white text-black px-6 py-3 text-sm font-semibold hover:bg-white/90 transition`}>
-                    Sign in to continue
-                  </span>
-                </SignInButton>
-              </SignedOut>
-              <SignedIn>
-                {/* Add marketplace preview content here */}
-              </SignedIn>
-            </>
+            <ClientOnly>
+              <>
+                <SignedOut>
+                  <p className={`${dmSerifText.className} text-gray-400 mb-8`}>
+                    Sign in to evaluate your phone and see current market data.
+                  </p>
+                  <SignInButton mode="modal">
+                    <span className={`${dmSerifText.className} inline-flex items-center rounded-full bg-white text-black px-6 py-3 text-sm font-semibold hover:bg-white/90 transition`}>
+                      Sign in to continue
+                    </span>
+                  </SignInButton>
+                </SignedOut>
+                <SignedIn>
+                  {/* Add marketplace preview content here */}
+                </SignedIn>
+              </>
+            </ClientOnly>
           ) : null}
         </section>
       </main>
