@@ -26,20 +26,22 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   return (
-    <ClerkProvider
-      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
-    // Avoid build-time failures on static generation when key is missing in CI
-    // Clerk will still require keys at runtime where needed
-    >
+    publishableKey ? (
+      <ClerkProvider publishableKey={publishableKey}>
+        <html lang="en">
+          <body className={`${dmSerifText.variable} antialiased bg-black text-white font-sans`}>
+            <Provider>{children}</Provider>
+          </body>
+        </html>
+      </ClerkProvider>
+    ) : (
       <html lang="en">
-        <body
-          className={`${dmSerifText.variable} antialiased bg-black text-white font-sans`}
-        >
+        <body className={`${dmSerifText.variable} antialiased bg-black text-white font-sans`}>
           <Provider>{children}</Provider>
-
         </body>
       </html>
-    </ClerkProvider>
+    )
   );
 }
