@@ -27,7 +27,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+    // Avoid build-time failures on static generation when key is missing in CI
+    // Clerk will still require keys at runtime where needed
+    >
       <html lang="en">
         <body
           className={`${dmSerifText.variable} antialiased bg-black text-white font-sans`}
