@@ -23,6 +23,8 @@ export const metadata: Metadata = {
   description: "Vault your iOS devices, understand value, resell at a fair price.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {

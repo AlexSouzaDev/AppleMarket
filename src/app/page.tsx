@@ -6,6 +6,8 @@ import DeviceValuationForm from './components/DeviceValuationForm';
 import ClientOnly from './components/ClientOnly';
 import products from './products.json';
 
+export const dynamic = "force-dynamic";
+
 const dmSerifText = DM_Serif_Text({ subsets: ["latin"], weight: ["400"], display: "swap" });
 
 export default function Home() {
