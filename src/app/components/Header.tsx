@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { UserButton, SignInButton, SignedIn, SignedOut } from '@clerk/nextjs';
 
 export default function Header() {
+    const hasClerk = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
     return (
         <header className="bg-white border-b border-gray-200">
             <div className="container mx-auto px-4 py-4">
@@ -31,16 +32,18 @@ export default function Header() {
                                     myApples
                                 </Link>
                             </li>
-                            <li>
-                                <SignedOut>
-                                    <SignInButton mode="modal">
-                                        <span className="inline-flex items-center rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-black hover:bg-gray-100 transition-colors cursor-pointer">Sign in</span>
-                                    </SignInButton>
-                                </SignedOut>
-                                <SignedIn>
-                                    <UserButton afterSignOutUrl="/" />
-                                </SignedIn>
-                            </li>
+                            {hasClerk ? (
+                                <li>
+                                    <SignedOut>
+                                        <SignInButton mode="modal">
+                                            <span className="inline-flex items-center rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-black hover:bg-gray-100 transition-colors cursor-pointer">Sign in</span>
+                                        </SignInButton>
+                                    </SignedOut>
+                                    <SignedIn>
+                                        <UserButton afterSignOutUrl="/" />
+                                    </SignedIn>
+                                </li>
+                            ) : null}
                         </ul>
                     </nav>
                 </div>
