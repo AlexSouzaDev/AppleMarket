@@ -24,6 +24,7 @@ interface FormData {
 }
 
 export default function DeviceValuationForm() {
+    const hasClerk = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
     const [formData, setFormData] = useState<FormData>({
         modelId: '',
         capacity: '',
@@ -36,7 +37,14 @@ export default function DeviceValuationForm() {
         priceAdjAmount: 0,
     });
     const [isDirty, setIsDirty] = useState(false);
-    const { isSignedIn } = useAuth();
+    let isSignedIn = false;
+    try {
+        // Safely call useAuth; if ClerkProvider is missing, this may throw in SSR/CI
+        const auth = useAuth();
+        isSignedIn = !!auth?.isSignedIn;
+    } catch {
+        isSignedIn = false;
+    }
 
     const selectedModel = MODELS.find(m => m.id === formData.modelId);
 
@@ -299,14 +307,24 @@ export default function DeviceValuationForm() {
                 </div>
 
                 {!isSignedIn ? (
-                    <SignInButton mode="modal">
+                    hasClerk ? (
+                        <SignInButton mode="modal">
+                            <button
+                                type="button"
+                                className="w-full mt-6 bg-black text-white rounded-full py-3 px-6 hover:bg-black/90 transition"
+                            >
+                                Sign in to Save
+                            </button>
+                        </SignInButton>
+                    ) : (
                         <button
                             type="button"
-                            className="w-full mt-6 bg-black text-white rounded-full py-3 px-6 hover:bg-black/90 transition"
+                            disabled
+                            className="w-full mt-6 bg-black/50 text-white rounded-full py-3 px-6 cursor-not-allowed"
                         >
-                            Sign in to Save
+                            Sign in unavailable
                         </button>
-                    </SignInButton>
+                    )
                 ) : (
                     <button
                         type="submit"
